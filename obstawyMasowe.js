@@ -268,8 +268,8 @@
                 { name: 'deff_count', controls: [{ type: 'input', attributes: { id: 'deff_count', size: 10 } }] },
                 { name: 'spear_count', controls: [{ type: 'input', attributes: { id: 'spear_count', size: 10 } }] },
                 { name: 'sword_count', controls: [{ type: 'input', attributes: { id: 'sword_count', size: 10 } }] },
-                { name: 'heavy_count', controls: [{ type: 'input', attributes: { id: 'heavy_count', size: 10 } }] },
                 { name: 'spy_count', controls: [{ type: 'input', attributes: { id: 'spy_count', size: 10 } }] },
+                { name: 'heavy_count', controls: [{ type: 'input', attributes: { id: 'heavy_count', size: 10 } }] },
                 { name: 'village_count', controls: [{ type: 'input', attributes: { id: 'village_count', size: 10 } }] },
                 { name: 'minimal_deff_count', controls: [{ type: 'input', attributes: { id: 'minimal_deff_count', size: 10 } }] },
                 { name: 'strategy', controls: [{ type: 'select', attributes: { id: 'strategy' } }] },
@@ -694,9 +694,24 @@
             }
 
             let select_troops = function (troops_info, user_input) {
-                if((user_input.spear_count !== 0) || (user_input.sword_count !== 0) || (user_input.heavy_count !== 0)) {
-
-                        troops_info.villages.sort(sort_by_spear_desc);
+                if(user_input.deff_count !== 0) {
+                    troops_info.villages.sort(sort_by_deff_desc);
+                    for (let i = troops_info.villages.length; i > 0; i--) {
+                        const village = troops_info.villages[i - 1];
+                        const threshold = (user_input.deff_count - troops_info.selected.deff) / i;
+                        const ratio = threshold < village.deff ? threshold / village.deff : 1.0;
+                        for (const unit_name in Guard.default_settings.ratio) {
+                            if (Guard.deff_units.includes(unit_name)) {
+                                const selected_count = Math.min(Math.round(ratio * village.units[unit_name]), village.units[unit_name]);
+                                troops_info.selected[unit_name] += selected_count;
+                                troops_info.selected.deff += selected_count * Number(Guard.settings.ratio[unit_name]);
+                                village.units[unit_name] = selected_count;
+                            }
+                        }
+                    }
+                }
+                else {
+                    troops_info.villages.sort(sort_by_spear_desc);
                         for (let i = troops_info.villages.length; i > 0; i--) {
                             const village = troops_info.villages[i - 1];
                             const threshold = (user_input.spear_count - troops_info.selected.spear) / i;
@@ -725,23 +740,6 @@
                             troops_info.selected.heavy += selected_count;
                             village.units.heavy = selected_count;
                         }
-
-                }
-                else {
-                    troops_info.villages.sort(sort_by_deff_desc);
-                    for (let i = troops_info.villages.length; i > 0; i--) {
-                        const village = troops_info.villages[i - 1];
-                        const threshold = (user_input.deff_count - troops_info.selected.deff) / i;
-                        const ratio = threshold < village.deff ? threshold / village.deff : 1.0;
-                        for (const unit_name in Guard.default_settings.ratio) {
-                            if (Guard.deff_units.includes(unit_name)) {
-                                const selected_count = Math.min(Math.round(ratio * village.units[unit_name]), village.units[unit_name]);
-                                troops_info.selected[unit_name] += selected_count;
-                                troops_info.selected.deff += selected_count * Number(Guard.settings.ratio[unit_name]);
-                                village.units[unit_name] = selected_count;
-                            }
-                        }
-                    }
                 }
 
                 troops_info.villages.sort(sort_by_spy_desc);
@@ -1054,3 +1052,4 @@
     try { await Guard.main(); } catch (ex) { Helper.handle_error(ex); }
     console.log(`${namespace} | Elapsed time: ${Date.now() - start} [ms]`);
 })(TribalWars);
+
