@@ -7,7 +7,7 @@
 // @include https://pl*.plemiona.pl/game.php?*screen=info_village*
 // @grant        none
 // ==/UserScript==
-//debugger;
+debugger;
 (function() {
     'use strict';
 
@@ -709,13 +709,32 @@
                             : Math.max(village.units[unit_name] - Number(Guard.settings.safeguard[unit_name]), 0);
 
                         if (!isNaN(user_input.travel_time) && !isNaN(user_input.after_date_travel_time) && Guard.world_info.unit_info.hasOwnProperty(unit_name)) {
-                             if (Number(Guard.world_info.unit_info[unit_name].speed) * village_troop_info.distance > user_input.travel_time ||
-                                (Number(Guard.world_info.unit_info[unit_name].speed) * village_troop_info.distance < user_input.after_date_travel_time)) {
-                                    village_troop_info.units[unit_name] = 0;
-                                }
+                             if ((Number(Guard.world_info.unit_info[unit_name].speed) * village_troop_info.distance < user_input.travel_time) &&
+                                 (Number(Guard.world_info.unit_info[unit_name].speed) * village_troop_info.distance > user_input.after_date_travel_time)) {
+
+                             }
+                             else {
+                                 if (user_input.split_units) {
+                                      village_troop_info.units[unit_name] = 0;
+                                 }
+                                 else {
+                                     if (unit_name === "sword") {
+                                         village_troop_info.units[unit_name] = 0;
+                                     }
+
+                                     if ((unit_name === "spear") && village_troop_info.units["sword"] === 0 )
+                                     {
+                                         village_troop_info.units[unit_name] = 0;
+                                     }
+
+                                     if ((unit_name === "heavy") && village_troop_info.units["sword"] === 0  && village_troop_info.units["spear"] === 0)
+                                     {
+                                         village_troop_info.units[unit_name] = 0;
+                                     }
+                                 }
+                             }
                         }
                         else {
-
                             if (!isNaN(user_input.travel_time) && Guard.world_info.unit_info.hasOwnProperty(unit_name)) {
                                 if (Number(Guard.world_info.unit_info[unit_name].speed) * village_troop_info.distance > user_input.travel_time) {
                                     village_troop_info.units[unit_name] = 0;
@@ -724,7 +743,10 @@
 
                             if (!isNaN(user_input.after_date_travel_time) && Guard.world_info.unit_info.hasOwnProperty(unit_name)) {
                                 if (Number(Guard.world_info.unit_info[unit_name].speed) * village_troop_info.distance < user_input.after_date_travel_time) {
-                                    village_troop_info.units[unit_name] = 0;
+                                    if (village_troop_info.units["sword"] === 0 || village_troop_info.units["spear"] === 0)
+                                    {
+                                        village_troop_info.units[unit_name] = 0;
+                                    }
                                 }
                             }
                         }
