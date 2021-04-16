@@ -599,7 +599,7 @@ debugger;
                 user_input.group_id = Helper.get_control('group').value;
                 user_input.split_units = Helper.get_control('split_units').checked;
                 user_input.travel_time = NaN;
-                user_input.after_date_tracel_time = NaN;
+                user_input.after_date_travel_time = NaN;
                 if (Helper.get_control('is_arrival_date_enabled').checked) {
                     let arrival_date = Helper.parse_date(Helper.get_control('arrival_date').value, i18n.LABELS.arrival_date);
                     if (arrival_date.getTime() <= Date.now()) {
@@ -709,8 +709,8 @@ debugger;
                             : Math.max(village.units[unit_name] - Number(Guard.settings.safeguard[unit_name]), 0);
 
                         if (!isNaN(user_input.travel_time) && !isNaN(user_input.after_date_travel_time) && Guard.world_info.unit_info.hasOwnProperty(unit_name)) {
-                             if ((Number(Guard.world_info.unit_info[unit_name].speed) * village_troop_info.distance < user_input.travel_time) &&
-                                 (Number(Guard.world_info.unit_info[unit_name].speed) * village_troop_info.distance > user_input.after_date_travel_time)) {
+                             if (Number(Guard.world_info.unit_info[unit_name].speed) * village_troop_info.distance < user_input.travel_time &&
+                                 Number(Guard.world_info.unit_info[unit_name].speed) * village_troop_info.distance > user_input.after_date_travel_time) {
 
                              }
                              else {
@@ -722,12 +722,16 @@ debugger;
                                          village_troop_info.units[unit_name] = 0;
                                      }
 
-                                     if ((unit_name === "spear") && village_troop_info.units["sword"] === 0 )
+                                     else if ((unit_name === "spear") && village_troop_info.units["sword"] === 0 )
                                      {
                                          village_troop_info.units[unit_name] = 0;
                                      }
 
-                                     if ((unit_name === "heavy") && village_troop_info.units["sword"] === 0 && village_troop_info.units["spear"] === 0)
+                                     else if ((unit_name === "heavy") && village_troop_info.units["sword"] === 0 && village_troop_info.units["spear"] === 0)
+                                     {
+                                         village_troop_info.units[unit_name] = 0;
+                                     }
+                                     else
                                      {
                                          village_troop_info.units[unit_name] = 0;
                                      }
@@ -1140,4 +1144,3 @@ debugger;
     try { await Guard.main(); } catch (ex) { Helper.handle_error(ex); }
     console.log(`${namespace} | Elapsed time: ${Date.now() - start} [ms]`);
 })(TribalWars);
-
