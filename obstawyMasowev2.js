@@ -255,6 +255,7 @@ debugger;
                                 payload_formdata += `&call[${village_id}][${unit_name}]=${village_troops[unit_name]}`;
                             }
                         }
+
                         fetch(TribalWars.buildURL('GET', 'place', { mode: 'call', action: 'call' }), {
                             body: encodeURI(payload_formdata),
                             method: 'POST',
@@ -698,8 +699,8 @@ debugger;
                     if (village_troop_info.distance === 0) {
                         continue;
                     }
-
-                    for (const unit_name of Guard.deff_units) {
+                    let ordered_deff_units = ["sword", "spear", "heavy", "spy"];
+                    for (const unit_name of ordered_deff_units) {
                         const ratio = Guard.settings.ratio[unit_name] === undefined
                             ? 0
                             : Number(Guard.settings.ratio[unit_name]);
@@ -708,58 +709,77 @@ debugger;
                             ? 0
                             : Math.max(village.units[unit_name] - Number(Guard.settings.safeguard[unit_name]), 0);
 
-                        if (!isNaN(user_input.travel_time) && !isNaN(user_input.after_date_travel_time) && Guard.world_info.unit_info.hasOwnProperty(unit_name)) {
-                             if (Number(Guard.world_info.unit_info[unit_name].speed) * village_troop_info.distance < user_input.travel_time &&
-                                 Number(Guard.world_info.unit_info[unit_name].speed) * village_troop_info.distance > user_input.after_date_travel_time) {
+                        if (Guard.world_info.unit_info.hasOwnProperty(unit_name))
+                        {
+                            if (!isNaN(user_input.travel_time) &&
+                                !isNaN(user_input.after_date_travel_time))
+                            {
+                                if ((Number(Guard.world_info.unit_info[unit_name].speed) * village_troop_info.distance < user_input.travel_time) &&
+                                    (Number(Guard.world_info.unit_info[unit_name].speed) * village_troop_info.distance > user_input.after_date_travel_time) )
+                                {
+                                    continue;
+                                }
+                                else
+                                {
+                                    if (user_input.split_units)
+                                    {
+                                        village_troop_info.units[unit_name] = 0;
+                                    }
+                                    else
+                                    {
+                                        if ((Number(Guard.world_info.unit_info[unit_name].speed) * village_troop_info.distance < user_input.after_date_travel_time))
+                                        {
+                                            if (unit_name === "sword")
+                                            {
+                                                village_troop_info.units[unit_name] = 0;
+                                            }
+                                            else if (unit_name === "spear" && village_troop_info.units["sword"] === 0)
+                                            {
+                                                village_troop_info.units[unit_name] = 0;
+                                            }
+                                            else if (unit_name === "heavy" && village_troop_info.units["sword"] === 0 && village_troop_info.units["spear"] === 0)
+                                            {
+                                                village_troop_info.units[unit_name] = 0;
+                                            }
 
-                             }
-                             else {
-                                 if (user_input.split_units) {
-                                      village_troop_info.units[unit_name] = 0;
-                                 }
-                                 else {
-                                     if (unit_name === "sword") {
-                                         village_troop_info.units[unit_name] = 0;
-                                     }
-
-                                     else if ((unit_name === "spear") && village_troop_info.units["sword"] === 0 )
-                                     {
-                                         village_troop_info.units[unit_name] = 0;
-                                     }
-
-                                     else if ((unit_name === "heavy") && village_troop_info.units["sword"] === 0 && village_troop_info.units["spear"] === 0)
-                                     {
-                                         village_troop_info.units[unit_name] = 0;
-                                     }
-                                     else
-                                     {
-                                         village_troop_info.units[unit_name] = 0;
-                                     }
-                                 }
-                             }
-                        }
-                        else {
-                            if (!isNaN(user_input.travel_time) && Guard.world_info.unit_info.hasOwnProperty(unit_name)) {
-                                if (Number(Guard.world_info.unit_info[unit_name].speed) * village_troop_info.distance > user_input.travel_time) {
-                                    village_troop_info.units[unit_name] = 0;
+                                        }
+                                        else
+                                        {
+                                               village_troop_info.units[unit_name] = 0;
+                                        }
+                                        
+                                    }
                                 }
                             }
-
-                            if (!isNaN(user_input.after_date_travel_time) && Guard.world_info.unit_info.hasOwnProperty(unit_name)) {
-                                if (Number(Guard.world_info.unit_info[unit_name].speed) * village_troop_info.distance < user_input.after_date_travel_time) {
-                                    if (user_input.split_units) {
-                                      village_troop_info.units[unit_name] = 0;
+                            else
+                            {
+                                if (!isNaN(user_input.travel_time))
+                                {
+                                    if (Number(Guard.world_info.unit_info[unit_name].speed) * village_troop_info.distance > user_input.travel_time)
+                                    {
+                                        village_troop_info.units[unit_name] = 0;
                                     }
-                                    else {
-                                        if (village_troop_info.units["sword"] === 0 || village_troop_info.units["spear"] === 0)
+                                }
+
+                                if (!isNaN(user_input.after_date_travel_time))
+                                {
+                                    if (Number(Guard.world_info.unit_info[unit_name].speed) * village_troop_info.distance < user_input.after_date_travel_time)
+                                    {
+                                        if (user_input.split_units)
                                         {
                                             village_troop_info.units[unit_name] = 0;
+                                        }
+                                        else
+                                        {
+                                            if (village_troop_info.units["sword"] === 0 || village_troop_info.units["spear"] === 0)
+                                            {
+                                                village_troop_info.units[unit_name] = 0;
+                                            }
                                         }
                                     }
                                 }
                             }
                         }
-
                         if (unit_name !== 'spy' && ratio === 0) {
                             village_troop_info.units[unit_name] = 0;
                         }
