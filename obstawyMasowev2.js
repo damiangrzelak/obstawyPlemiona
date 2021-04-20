@@ -737,7 +737,7 @@ debugger;
                                             {
                                                 village_troop_info.units[unit_name] = 0;
                                             }
-                                            else if (unit_name === "heavy" && village_troop_info.units["sword"] === 0 && village_troop_info.units["spear"] === 0)
+                                            else if ((unit_name === "heavy" || unit_name === "spy" ) && village_troop_info.units["sword"] === 0 && village_troop_info.units["spear"] === 0)
                                             {
                                                 village_troop_info.units[unit_name] = 0;
                                             }
